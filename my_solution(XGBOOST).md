@@ -138,6 +138,7 @@ train %>%
   scale_y_log10() +
   labs(x = "Direct distance [m]", y = "Trip duration [s]")
 ```
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Duration%20vs%20distance.png)
 I can see that there are many outliers near distance = 0 and trip duration = 1e+05. I will remove those outliers
 ```
 #remove dist outliers
@@ -251,4 +252,4 @@ imp_matrix %>%
   theme(legend.position = "none") +
   labs(x = "Features", y = "Importance")
 ```
-
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Importance.png)
