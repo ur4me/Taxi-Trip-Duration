@@ -241,7 +241,7 @@ solution <- data.frame(id = test$id, trip_duration = prediction)
 write.csv(solution, file = 'xgb_Sol1.csv', row.names = F)
 ```
 
-Finally, I will check which variables influenced the trip_duration values. 
+Finally, I will check which variables influenced the response variable (trip_duration). 
 ```
 #Check importance
 imp_matrix <- as.tibble(xgb.importance(feature_names = colnames(train1 %>% select(-trip_duration)), model = gb_dt))
