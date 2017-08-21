@@ -10,7 +10,7 @@
 
 
 ## Introduction
-This is a competion that gives me a chance to win 30,000 USD if I be in a first place. There is no missing values; however, there are more than 2million observations.
+This is a competion that gives me a chance to win 30,000 USD if I be in a first place. There is no missing values; however, there are more than 2million observations so it seems like data cleaning will play pivotal role in creating robust model.
 I will create new variables and use XGBOOST to predict train data set.
 
 ## Preparation
