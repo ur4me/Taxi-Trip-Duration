@@ -47,7 +47,7 @@ We have pickup locations and dropoff locations. I will calculate actual distance
 ```
 total <- mutate(total, dist= distHaversine(matrix(c(pickup_longitude, pickup_latitude), ncol = 2),matrix(c(dropoff_longitude,dropoff_latitude), ncol = 2))/1000)
 ```
-From the pickup datetime column, I can retrive useful information. I will create some columns from the datetime information.
+I can retrive useful information from the pickup datetime column.  I will create some new columns from the datetime information.
 ```
 #Create pickup_hour column
 total$pickup_hour <- hour(total$pickup_datetime)
@@ -59,7 +59,7 @@ total$pickup_month <- month(total$pickup_datetime)
 total$pickup_weekdays <- weekdays(as.Date(total$pickup_datetime))
 ```
 
-Area should play important role in the trip duration. I will devide New York City into 100 different area and I will distribute this almost equally.
+Area should play important role in the trip duration. I will devide New York City into 100 different areas.
 ```
 #Devide area with pickup longitude
 total$plong <- total$pickup_longitude
@@ -113,7 +113,7 @@ total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.7) & tota
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.8) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.9)]<- '9'
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.9) & total$dropoff_latitude < quantile(total$dropoff_latitude,1)]<- '10'
 ```
-I will change strings to factors
+I will change strings to factors.
 ```
 total <- as.data.frame(unclass(total))
 ```
@@ -155,7 +155,7 @@ index_outlier <- which(lower_outlier > train$trip_duration, upper_outlier < trai
 train <- train[-index_outlier,]
 ```
 
-I will remove outliers in the longitude and latitude columns for robust model.
+I will remove outliers in the longitude and latitude columns in order to make robust model.
 ```
 #remove pickup_longitude outliers
 upper_outlier <- quantile(train$pickup_longitude,0.99)
