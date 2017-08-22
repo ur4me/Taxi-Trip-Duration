@@ -182,7 +182,7 @@ index_outlier <- which(lower_outlier > train$dropoff_latitude, upper_outlier < t
 train <- train[-index_outlier,]
 ```
 
-I will reduce variables.
+I will drop off some variables that are no longer needed.
 ```
 
 train1 <- train %>% select(vendor_id, passenger_count, store_and_fwd_flag, trip_duration, dist, pickup_hour, pickup_week, pickup_month, pickup_weekdays, travel)
