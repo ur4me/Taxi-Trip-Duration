@@ -55,8 +55,8 @@ total$pickup_hour <- hour(total$pickup_datetime)
 total$pickup_week <- week(total$pickup_datetime)
 #Create pickup_month column
 total$pickup_month <- month(total$pickup_datetime)
-#Create pickup_weekdays column
-total$pickup_weekdays <- weekdays(as.Date(total$pickup_datetime))
+#Create pickup_days column
+total$pickup_days <- weekdays(as.Date(total$pickup_datetime))
 ```
 
 Area should play important role in the trip duration. I will devide New York City into 100 different areas.
@@ -185,9 +185,9 @@ train <- train[-index_outlier,]
 I will drop off some variables that are no longer needed.
 ```
 
-train1 <- train %>% select(vendor_id, passenger_count, store_and_fwd_flag, trip_duration, dist, pickup_hour, pickup_week, pickup_month, pickup_weekdays, travel)
+train1 <- train %>% select(vendor_id, passenger_count, store_and_fwd_flag, trip_duration, dist, pickup_hour, pickup_week, pickup_month, pickup_days, travel)
 
-test1 <- test %>% select(id, vendor_id, passenger_count, store_and_fwd_flag, dist, pickup_hour, pickup_week, pickup_month, pickup_weekdays, travel)
+test1 <- test %>% select(id, vendor_id, passenger_count, store_and_fwd_flag, dist, pickup_hour, pickup_week, pickup_month, pickup_days, travel)
 ```
 
 ## Prediction
