@@ -199,9 +199,9 @@ I will predict the test data using XGBOOST. Before the prediction, I need to do 
 train1[] <- lapply(train1, as.numeric)
 test1[]<-lapply(test1, as.numeric)
 
-foo <- train1 %>% select(-trip_duration)
+withoutRV <- train1 %>% select(-trip_duration)
 
-dtrain <- xgb.DMatrix(as.matrix(foo),label = train1$trip_duration)
+dtrain <- xgb.DMatrix(as.matrix(withoutRV),label = train1$trip_duration)
 dtest <- xgb.DMatrix(as.matrix(test1))
 
 ```
@@ -219,11 +219,11 @@ xgb_params <- list(colsample_bytree = 0.5, #variables per tree
                    seed = 4321
 ```
 ```
-#checking iterations
+#cross-validation and checking iterations
 set.seed(4321)
 xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 5, nrounds=200)
 ```
-61 was my best iteration.
+61 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
 
 
 
