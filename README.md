@@ -310,7 +310,7 @@ write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
 ```  
   
 ## Conclusion
-This time I got 0.45701 RMSLE which is great improvement. Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
+This time I got 0.45701 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
 ```
 #Check importance
 imp_matrix <- as.tibble(xgb.importance(feature_names = colnames(train1 %>% select(-trip_duration)), model = gb_dt))
