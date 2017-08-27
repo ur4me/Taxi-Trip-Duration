@@ -11,7 +11,7 @@
 
 
 ## Introduction
-My score for previous work was 0.57034 (RMSLE) and I wanted to improve my score. This time I used Open Source Routing Machine called OSRM to get useful variables. The data set is provided by Oscalreo and it contains important information such as estimated shortest distance and duration between two points and sequence of travels steps such as turns or entering a highway. Most of the process is similar to previous work.
+My score for previous work was 0.57034 (RMSLE) and I wanted to improve my score. This time I used Open Source Routing Machine called OSRM to get useful variables. The data set is provided by Oscalreo and it contains important information such as estimated shortest distance and duration between two points and sequence of travels steps such as turns or entering a highway. Most of the process is similar to my previous work.
 
 ## Preparation
 #### Initial works
