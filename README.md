@@ -33,7 +33,7 @@ setwd('c:/kaggle/taxi')
 #retrieve train and test
 train <- read.csv('train.csv', na.strings = c("", "NA"), stringsAsFactors = F)
 test <- read.csv('test.csv', na.strings = c("", "NA"), stringsAsFactors = F)
-
+```
 
 
 #### Retrieve data from Open Source Routing Machine called OSRM
@@ -264,18 +264,17 @@ xgb_params <- list(colsample_bytree = 0.8, #variables per tree
 ```
 #cross-validation and checking iterations
 set.seed(4321)
-xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 5, print_every_n = 5, nrounds=300, nthread=6)
+xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 5, print_every_n = 5, nrounds=350, nthread=6)
 
 ```
-61 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
+350 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
 
 ```
-#### Real Prediction
 #predict the model
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain,
                    verbose = 1, maximize =F,
-                   nrounds = 300, nthread=6)
+                   nrounds = 350, nthread=6)
 
 prediction <- predict(gb_dt,dtest)
 
@@ -283,6 +282,8 @@ prediction <- predict(gb_dt,dtest)
 rmse(testing$trip_duration, prediction)
 ```
 
+#### Real prediction
+```
 #predict with real test data
 
 withoutRV <- train1 %>% select(-trip_duration)
@@ -294,7 +295,7 @@ dtest1 <- xgb.DMatrix(as.matrix(test1))
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain1,
                    verbose = 1, maximize =F,
-                   nrounds = 210, nthread=6)
+                   nrounds = 350, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
 solution <- data.frame(id = test$id, trip_duration = exp(prediction)-1)
@@ -304,7 +305,8 @@ a <- which(solution$trip_duration < 0)
 
 #save
 write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
-          
+```  
+  
 ## Conclusion
 This time I got 0.45701 RMSLE which is great improvement. Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
 ```
