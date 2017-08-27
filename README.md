@@ -215,6 +215,7 @@ I found out that there are some missing values in row 1458644.
 #remove row 1458644
 train1 <- train1[-1458644,]
 ```
+
 ## Prediction
 I will predict the test data using XGBOOST. Before the prediction, I need to do some preparations.
 
@@ -317,5 +318,6 @@ imp_matrix %>%
   theme(legend.position = "none") +
   labs(x = "Features", y = "Importance")
 ```
-![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Importance2.png)
+
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance2.png)
 
