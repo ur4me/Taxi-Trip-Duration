@@ -298,10 +298,12 @@ gb_dt <- xgb.train(params = xgb_params,
                    nrounds = 350, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
+
+#save the file (Need to use exp and -1 to change it back)
 solution <- data.frame(id = test$id, trip_duration = exp(prediction)-1)
 
 #check negative value
-a <- which(solution$trip_duration < 0)
+which(solution$trip_duration < 0)
 
 #save
 write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
@@ -323,3 +325,4 @@ imp_matrix %>%
 
 ![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance2.png)
 
+Yes, I can see that the variables from OSRM played significant role in predicting trip duration.
