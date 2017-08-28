@@ -71,14 +71,17 @@ total$pickup_hour <- hour(total$pickup_datetime)
 total$pickup_week <- week(total$pickup_datetime)
 #Create pickup_month column
 total$pickup_month <- month(total$pickup_datetime)
+#Create pickup_dayname column
+total$pickup_dayname <- weekdays(as.Date(total$pickup_datetime))
 #Create pickup_days column
-total$pickup_days <- weekdays(as.Date(total$pickup_datetime))
+total$pickup_days <- day(total$pickup_datetime)
+#combine pickup_days and pickup_month
+total$date <- with(total, interaction(pickup_days, pickup_month))
 ```
 
 Area should play important role in the trip duration. I will devide New York City into 100 different areas.
 ```
 #Devide area with pickup longitude
-total$plong <- total$pickup_longitude
 total$plong[total$pickup_longitude < quantile(total$pickup_longitude,0.1)]<- 'a'
 total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.1) & total$pickup_longitude < quantile(total$pickup_longitude,0.2)]<- 'b'
 total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.2) & total$pickup_longitude < quantile(total$pickup_longitude,0.3)]<- 'c'
@@ -88,10 +91,9 @@ total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.5) & tot
 total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.6) & total$pickup_longitude < quantile(total$pickup_longitude,0.7)]<- 'g'
 total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.7) & total$pickup_longitude < quantile(total$pickup_longitude,0.8)]<- 'h'
 total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.8) & total$pickup_longitude < quantile(total$pickup_longitude,0.9)]<- 'i'
-total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.9) & total$pickup_longitude < quantile(total$pickup_longitude,1)]<- 'j'
+total$plong[total$pickup_longitude >= quantile(total$pickup_longitude,0.9) & total$pickup_longitude <= quantile(total$pickup_longitude,1)]<- 'j'
 
 #Devide area with pickup latitude
-total$plat <- total$pickup_latitude
 total$plat[total$pickup_latitude < quantile(total$pickup_latitude,0.1)]<- '1'
 total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.1) & total$pickup_latitude < quantile(total$pickup_latitude,0.2)]<- '2'
 total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.2) & total$pickup_latitude < quantile(total$pickup_latitude,0.3)]<- '3'
@@ -101,10 +103,9 @@ total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.5) & total$
 total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.6) & total$pickup_latitude < quantile(total$pickup_latitude,0.7)]<- '7'
 total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.7) & total$pickup_latitude < quantile(total$pickup_latitude,0.8)]<- '8'
 total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.8) & total$pickup_latitude < quantile(total$pickup_latitude,0.9)]<- '9'
-total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.9) & total$pickup_latitude < quantile(total$pickup_latitude,1)]<- '10'
+total$plat[total$pickup_latitude >= quantile(total$pickup_latitude,0.9) & total$pickup_latitude <= quantile(total$pickup_latitude,1)]<- '10'
 
 #Devide area with dropoff longitude
-total$dlong <- total$dropoff_longitude
 total$dlong[total$dropoff_longitude < quantile(total$dropoff_longitude,0.1)]<- 'a'
 total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.1) & total$dropoff_longitude < quantile(total$dropoff_longitude,0.2)]<- 'b'
 total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.2) & total$dropoff_longitude < quantile(total$dropoff_longitude,0.3)]<- 'c'
@@ -114,10 +115,9 @@ total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.5) & t
 total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.6) & total$dropoff_longitude < quantile(total$dropoff_longitude,0.7)]<- 'g'
 total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.7) & total$dropoff_longitude < quantile(total$dropoff_longitude,0.8)]<- 'h'
 total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.8) & total$dropoff_longitude < quantile(total$dropoff_longitude,0.9)]<- 'i'
-total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.9) & total$dropoff_longitude < quantile(total$dropoff_longitude,1)]<- 'j'
+total$dlong[total$dropoff_longitude >= quantile(total$dropoff_longitude,0.9) & total$dropoff_longitude <= quantile(total$dropoff_longitude,1)]<- 'j'
 
 #Devide area with dropoff latitude
-total$dlat <- total$dropoff_latitude
 total$dlat[total$dropoff_latitude < quantile(total$dropoff_latitude,0.1)]<- '1'
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.1) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.2)]<- '2'
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.2) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.3)]<- '3'
@@ -127,7 +127,7 @@ total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.5) & tota
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.6) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.7)]<- '7'
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.7) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.8)]<- '8'
 total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.8) & total$dropoff_latitude < quantile(total$dropoff_latitude,0.9)]<- '9'
-total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.9) & total$dropoff_latitude < quantile(total$dropoff_latitude,1)]<- '10'
+total$dlat[total$dropoff_latitude >= quantile(total$dropoff_latitude,0.9) & total$dropoff_latitude <= quantile(total$dropoff_latitude,1)]<- '10'
 ```
 I will change strings to factors.
 ```
@@ -201,9 +201,9 @@ train <- train[-index_outlier,]
 I will drop off some variables that are no longer needed.
 ```
 #remove some variables
-train1 <- train %>% select(vendor_id, passenger_count, dist, trip_duration, pickup_hour, pickup_week, pickup_month, pickup_days, travel, total_distance, total_travel_time, number_of_steps)
+train1 <- train %>% select(date, dist, trip_duration, pickup_hour, pickup_week, pickup_month, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
 
-test1 <- test %>% select(vendor_id, passenger_count, dist, pickup_hour, pickup_week, pickup_month, pickup_days, travel, total_distance, total_travel_time, number_of_steps)
+test1 <- test %>% select(date, dist, pickup_hour, pickup_week, pickup_month, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
 
 ```
 ```
@@ -302,7 +302,7 @@ prediction <- predict(gb_dt,dtest1)
 #save the file (Need to use exp and -1 to change it back)
 solution <- data.frame(id = test$id, trip_duration = exp(prediction)-1)
 
-#check negative value
+#check negative value just in case
 which(solution$trip_duration < 0)
 
 #save
