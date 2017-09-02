@@ -254,7 +254,7 @@ xgb_params <- list(colsample_bytree = 0.7, #variables per tree
                    subsample = 0.8, #data subset per tree 
                    booster = "gbtree",
                    max_depth = 10, #tree levels
-                   eta = 0.05, #shrinkage
+                   eta = 0.12, #shrinkage
                    eval_metric = "rmse", 
                    objective = "reg:linear",
                    gamma=0)
@@ -294,7 +294,7 @@ dtest1 <- xgb.DMatrix(as.matrix(test1))
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain1,
                    verbose = 1, maximize =F,
-                   nrounds = 450, nthread=6)
+                   nrounds = 192, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
 
