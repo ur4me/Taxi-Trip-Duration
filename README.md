@@ -200,7 +200,7 @@ text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T
 
 ![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Cooks%20distance.png)
 
-It shows that there are 5 outstanding outliers. I will remove those 4 rows.
+It shows that there are 5 outstanding outliers. I will remove those 5 rows.
 
 ```
 which(cooksd >0.02)
