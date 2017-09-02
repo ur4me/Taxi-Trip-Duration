@@ -242,7 +242,8 @@ testing <- train1[-partition,]
 #xgb matrix
 withoutRV <- training %>% select(-trip_duration)
 dtrain <- xgb.DMatrix(as.matrix(withoutRV),label = training$trip_duration)
-dtest <- xgb.DMatrix(as.matrix(testing))
+withoutRV1 <- testing %>% select(-trip_duration)
+dtest <- xgb.DMatrix(as.matrix(withoutRV1))
 ```
 
 
