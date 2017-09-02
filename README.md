@@ -142,70 +142,10 @@ Now, I will separate them back to train and test data set.
 ```
 train <- total[1:1458644,]
 test <- total[1458645:2083778,]
+train1 <-train
+test1 <- test
 ```
 
-#### Outlier handling
-I need a visualization to see outliers.
-```
-train %>%
-  ggplot(aes(dist, trip_duration)) +
-  geom_point() +
-  scale_x_log10() +
-  scale_y_log10() +
-  labs(x = "Direct distance [m]", y = "Trip duration [s]")
-```
-![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Duration%20vs%20distance.png)
-
-I can see that there are many outliers near distance = 0 and trip duration = 1e+05. I will remove those outliers
-```
-#remove dist outliers
-upper_outlier <- quantile(train$dist,0.99)
-lower_outlier <- quantile(train$dist,0.01) 
-index_outlier <- which(lower_outlier > train$dist, upper_outlier < train$dist)
-train <- train[-index_outlier,]
-
-#remove trip_duration outliers
-upper_outlier <- quantile(train$trip_duration,0.98)
-lower_outlier <- quantile(train$trip_duration,0.01) 
-index_outlier <- which(lower_outlier > train$trip_duration, upper_outlier < train$trip_duration)
-train <- train[-index_outlier,]
-```
-
-I will remove outliers in the longitude and latitude columns in order to make robust model.
-```
-#remove pickup_longitude outliers
-upper_outlier <- quantile(train$pickup_longitude,0.99)
-lower_outlier <- quantile(train$pickup_longitude,0.01) 
-index_outlier <- which(lower_outlier > train$pickup_longitude, upper_outlier < train$pickup_longitude)
-train <- train[-index_outlier,]
-
-#remove pickup_latitude outliers
-upper_outlier <- quantile(train$pickup_latitude,0.99)
-lower_outlier <- quantile(train$pickup_latitude,0.01) 
-index_outlier <- which(lower_outlier > train$pickup_latitude, upper_outlier < train$pickup_latitude)
-train <- train[-index_outlier,]
-
-#remove dropoff_longitude outliers
-upper_outlier <- quantile(train$dropoff_longitude,0.99)
-lower_outlier <- quantile(train$dropoff_longitude,0.01) 
-index_outlier <- which(lower_outlier > train$dropoff_longitude, upper_outlier < train$dropoff_longitude)
-train <- train[-index_outlier,]
-
-#remove dropoff_latitude outliers
-upper_outlier <- quantile(train$dropoff_latitude,0.99)
-lower_outlier <- quantile(train$dropoff_latitude,0.01) 
-index_outlier <- which(lower_outlier > train$dropoff_latitude, upper_outlier < train$dropoff_latitude)
-train <- train[-index_outlier,]
-```
-
-I will drop off some variables that are no longer needed.
-```
-#remove some variables
-train1 <- train %>% select(date, dist, trip_duration, pickup_hour, pickup_week, pickup_month, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
-
-test1 <- test %>% select(date, dist, pickup_hour, pickup_week, pickup_month, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
-
-```
 ```
 #Find NA rows that happened when I merged OSRM data
 train1[which(is.na(train1$total_distance)),]
@@ -216,16 +156,74 @@ I found out that there are some missing values in row 1458644.
 train1 <- train1[-1458644,]
 ```
 
+
+#### Outlier handling
+I need a visualization to see outliers.
+```
+train1 %>%
+  ggplot(aes(dist, trip_duration)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(x = "Direct distance [m]", y = "Trip duration [s]")
+```
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Duration%20vs%20distance.png)
+
+I can see that there are many outliers. I need to remove the outliers
+
+```
+#remove trip_duration outliers
+plot(train1$trip_duration)
+which(train1$trip_duration > 1500000)
+train1 <- train1[-which(train1$trip_duration > 1500000),]
+
+
+#remove dist outliers
+plot(train1$dist)
+which(train1$dist > 400)
+train1 <- train1[-which(train1$dist > 400),]
+```
+```
+#change to numeric
+train1[] <- lapply(train1, as.numeric)
+test1[]<-lapply(test1, as.numeric)
+```
+
+I will use Multivariate Model Approach, Cooks Distance, to find out outliers.
+```
+mod <- lm(trip_duration ~ ., data=train1)
+cooksd <- cooks.distance(mod)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  # add labels
+```
+
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/Cooks%20distance.png)
+
+It shows that there are 5 outstanding outliers. I will remove those 4 rows.
+
+```
+which(cooksd >0.02)
+train2 <- train2[-c(114377, 275644, 377067, 644163, 900378),]
+```
+
+
+I will drop off some variables that are no longer needed.
+```
+#remove some variables
+train1 <- train1 %>% select(date, dist, trip_duration, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
+
+test1 <- test1 %>% select(date, dist, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
+
+```
+
+
 ## Prediction
-I will predict the test data using XGBOOST. Before the prediction, I need to do some preparations.
+I will predict the test data using XGBOOST. Before the prediction, I need to convert trip_duration as the evaluation metric for this competition is Root Mean Squared Logarithmic Error. 
 
 
 ```
-#preparations
-train1[] <- lapply(train1, as.numeric)
-test1[]<-lapply(test1, as.numeric)
-
-#Change trip_duration as the evaluation metric for this competition is Root Mean Squared Logarithmic Error.
+#convert trip_duration
 train1 <- train1 %>% mutate(trip_duration = log(trip_duration + 1))
 ```
 
@@ -251,10 +249,10 @@ dtest <- xgb.DMatrix(as.matrix(testing))
 ```
 #xgboost parameters
 #xgboost parameters
-xgb_params <- list(colsample_bytree = 0.8, #variables per tree 
+xgb_params <- list(colsample_bytree = 0.7, #variables per tree 
                    subsample = 0.8, #data subset per tree 
                    booster = "gbtree",
-                   max_depth = 3, #tree levels
+                   max_depth = 5, #tree levels
                    eta = 0.05, #shrinkage
                    eval_metric = "rmse", 
                    objective = "reg:linear",
@@ -264,17 +262,17 @@ xgb_params <- list(colsample_bytree = 0.8, #variables per tree
 ```
 #cross-validation and checking iterations
 set.seed(4321)
-xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 5, print_every_n = 5, nrounds=350, nthread=6)
+xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 4, print_every_n = 5, nrounds=1000, nthread=6)
 
 ```
-350 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
+450 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
 
 ```
 #predict the model
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain,
                    verbose = 1, maximize =F,
-                   nrounds = 350, nthread=6)
+                   nrounds = 450, nthread=6)
 
 prediction <- predict(gb_dt,dtest)
 
@@ -295,7 +293,7 @@ dtest1 <- xgb.DMatrix(as.matrix(test1))
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain1,
                    verbose = 1, maximize =F,
-                   nrounds = 350, nthread=6)
+                   nrounds = 450, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
 
@@ -310,7 +308,7 @@ write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
 ```  
   
 ## Conclusion
-This time I got 0.45701 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
+This time I got 0.41288 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
 ```
 #Check importance
 imp_matrix <- as.tibble(xgb.importance(feature_names = colnames(train1 %>% select(-trip_duration)), model = gb_dt))
@@ -323,6 +321,6 @@ imp_matrix %>%
   labs(x = "Features", y = "Importance")
 ```
 
-![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance2.png)
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance3.png)
 
 Yes, I can see that the variables from OSRM played significant role in predicting trip duration.
