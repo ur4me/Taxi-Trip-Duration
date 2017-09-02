@@ -253,7 +253,7 @@ dtest <- xgb.DMatrix(as.matrix(withoutRV1))
 xgb_params <- list(colsample_bytree = 0.7, #variables per tree 
                    subsample = 0.8, #data subset per tree 
                    booster = "gbtree",
-                   max_depth = 5, #tree levels
+                   max_depth = 10, #tree levels
                    eta = 0.05, #shrinkage
                    eval_metric = "rmse", 
                    objective = "reg:linear",
@@ -266,14 +266,14 @@ set.seed(4321)
 xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 4, print_every_n = 5, nrounds=1000, nthread=6)
 
 ```
-450 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
+192 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
 
 ```
 #predict the model
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain,
                    verbose = 1, maximize =F,
-                   nrounds = 450, nthread=6)
+                   nrounds = 192, nthread=6)
 
 prediction <- predict(gb_dt,dtest)
 
@@ -309,7 +309,7 @@ write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
 ```  
   
 ## Conclusion
-This time I got 0.41288 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
+This time I got 0.40473 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
 ```
 #Check importance
 imp_matrix <- as.tibble(xgb.importance(feature_names = colnames(train1 %>% select(-trip_duration)), model = gb_dt))
