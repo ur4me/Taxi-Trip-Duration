@@ -246,9 +246,32 @@ withoutRV1 <- testing %>% select(-trip_duration)
 dtest <- xgb.DMatrix(as.matrix(withoutRV1))
 ```
 
+#### XGBOOST parameter tuning (Grid Search)
 
 ```
-#xgboost parameters
+train.control <- trainControl(method = "repeatedcv", repeats = 2,number = 3, search = "grid")
+
+tune.grid <- expand.grid(nrounds = c(100,150),
+                         max_depth = c(5,7,10),
+                         eta = c(0.10, 0.2),
+                         gamma = c(0.0, 0.2),
+                         colsample_bytree = c(0.5,0.7,1),
+                         min_child_weight= c(5,7), 
+                         subsample =c(0.5,0.8,1))
+
+
+
+caret.cv <-caret::train(trip_duration ~.,
+                        data=training,
+                        method="xgbTree",
+                        metric = "RMSE",
+                        tuneGrid=tune.grid,
+                        trControl=train.control)
+```
+The final values used for the model were nrounds = 150, max_depth = 10, eta = 0.1, gamma = 0, colsample_bytree = 0.7, min_child_weight = 5 and subsample = 0.8. I will use those parameters to make a model.
+
+#### Cross-validation
+```
 #xgboost parameters
 xgb_params <- list(colsample_bytree = 0.7, #variables per tree 
                    subsample = 0.8, #data subset per tree 
@@ -257,8 +280,7 @@ xgb_params <- list(colsample_bytree = 0.7, #variables per tree
                    eta = 0.12, #shrinkage
                    eval_metric = "rmse", 
                    objective = "reg:linear",
-                   gamma=0)
-                 
+                   gamma=0)                 
 ```
 ```
 #cross-validation and checking iterations
@@ -267,6 +289,8 @@ xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 4, print_
 
 ```
 192 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
+
+#### Predict subtest
 
 ```
 #predict the model
