@@ -133,12 +133,26 @@ I will change strings to factors.
 ```
 total <- as.data.frame(unclass(total))
 ```
-Finally I will combine those 4 columns(plong,  plat, dlong, dlat) into one column so that new column will contain travel information.
+I will make new variables by combining  those 4 columns((plong,  plat, dlong, dlat)
+
 ```
+total$pickup_location <- with(total, interaction(plong,  plat))
+total$dropoff_location <- with(total, interaction(dlong, dlat))
 total$travel <- with(total, interaction(plong,  plat, dlong, dlat))
 ```
+Next, I will make 'bearing' column.
 
-Now, I will separate them back to train and test data set.
+```
+#bearing
+pick_coord <- total %>%
+  select(pickup_longitude, pickup_latitude)
+drop_coord <- total %>%
+  select(dropoff_longitude, dropoff_latitude)
+total$bearing <- bearing(pick_coord, drop_coord)
+```
+
+
+I will separate them back to train and test data set.
 ```
 train <- total[1:1458644,]
 test <- total[1458645:2083778,]
@@ -211,10 +225,9 @@ train2 <- train2[-c(114377, 275644, 377067, 644163, 900378),]
 I will drop off some variables that are no longer needed.
 ```
 #remove some variables
-train1 <- train1 %>% select(date, dist, trip_duration, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
+train1 <- train1 %>% select(date, dist, trip_duration, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps, pickup_location, dropoff_location)
 
-test1 <- test1 %>% select(date, dist, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps)
-
+test1 <- test1 %>% select(date, dist, pickup_hour, pickup_week, pickup_dayname, travel, total_distance, total_travel_time, number_of_steps, pickup_location, dropoff_location)
 ```
 
 
@@ -288,7 +301,7 @@ set.seed(4321)
 xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 4, print_every_n = 5, nrounds=1000, nthread=6)
 
 ```
-192 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
+224 was my best iteration. I played around with the figures in parameters by using confusion matrix but omitted to state here as it was quite long process. Above figures gave me the best accuracy so far but I need to keep working on it to make best model.
 
 #### Predict subtest
 
@@ -297,7 +310,7 @@ xgb_cv <- xgb.cv(xgb_params,dtrain,early_stopping_rounds = 10, nfold = 4, print_
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain,
                    verbose = 1, maximize =F,
-                   nrounds = 192, nthread=6)
+                   nrounds = 224, nthread=6)
 
 prediction <- predict(gb_dt,dtest)
 
@@ -318,7 +331,7 @@ dtest1 <- xgb.DMatrix(as.matrix(test1))
 gb_dt <- xgb.train(params = xgb_params,
                    data = dtrain1,
                    verbose = 1, maximize =F,
-                   nrounds = 192, nthread=6)
+                   nrounds = 224, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
 
@@ -333,7 +346,7 @@ write.csv(solution, file = 'xgb_Sol10.csv', row.names = F)
 ```  
   
 ## Conclusion
-This time I got 0.40473 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
+This time I got 0.39577 RMSLE which is great improvement compare to my previous work (0.57034). Finally, I will check whether the variables from OSRM influenced the response variable (trip_duration). 
 ```
 #Check importance
 imp_matrix <- as.tibble(xgb.importance(feature_names = colnames(train1 %>% select(-trip_duration)), model = gb_dt))
@@ -346,6 +359,6 @@ imp_matrix %>%
   labs(x = "Features", y = "Importance")
 ```
 
-![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance3.png)
+![Alt text](https://github.com/ur4me/Taxi-Trip-Duration/blob/master/importance.png)
 
 Yes, I can see that the variables from OSRM played significant role in predicting trip duration.
