@@ -250,7 +250,7 @@ partition <- createDataPartition(y=outcome,
                                  p=.7,
                                  list=F)
 training <- train1[partition,]
-testing <- test1[-partition,]
+testing <- train1[-partition,]
 
 #xgb matrix
 withoutRV <- training %>% select(-trip_duration)
