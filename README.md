@@ -322,16 +322,9 @@ rmse(testing$trip_duration, prediction)
 ```
 #predict with real test data
 
-withoutRV <- train1 %>% select(-trip_duration)
 
-dtrain1 <- xgb.DMatrix(as.matrix(withoutRV),label = train1$trip_duration)
 dtest1 <- xgb.DMatrix(as.matrix(test1))
 
-
-gb_dt <- xgb.train(params = xgb_params,
-                   data = dtrain1,
-                   verbose = 1, maximize =F,
-                   nrounds = 224, nthread=6)
 
 prediction <- predict(gb_dt,dtest1)
 
